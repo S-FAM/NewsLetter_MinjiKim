@@ -5,16 +5,23 @@
 //  Created by 김민지 on 2022/06/07.
 //
 
+import Kingfisher
 import SnapKit
 import UIKit
 
 final class NewsListCollectionViewCell: UICollectionViewCell {
   static let identifier = "NewsListCollectionViewCell"
 
+  private let cornerRadius: CGFloat = 20.0
+
   private lazy var dateLabel: UILabel = {
     let label = UILabel()
     label.font = .systemFont(ofSize: 10.0, weight: .medium)
     label.textColor = UIColor(named: "AccentColor")
+    label.backgroundColor = UIColor(named: "SubColor")
+    label.textAlignment = .center
+    label.layer.cornerRadius = 12.0
+    label.clipsToBounds = true
 
     return label
   }()
@@ -29,17 +36,30 @@ final class NewsListCollectionViewCell: UICollectionViewCell {
   private lazy var descriptionLabel: UILabel = {
     let label = UILabel()
     label.font = .systemFont(ofSize: 10.0, weight: .regular)
-    label.numberOfLines = 0
+    label.numberOfLines = 3
 
     return label
   }()
 
-  func update() {
+  private lazy var imageView: UIImageView = {
+    let imageView = UIImageView()
+    imageView.contentMode = .scaleToFill
+    imageView.layer.cornerRadius = cornerRadius
+    imageView.clipsToBounds = true
+
+    return imageView
+  }()
+
+  func update(news: News) {
     setupView()
 
-    dateLabel.text = "2016.09.26"
-    titleLabel.text = "국내 주식형펀드서 사흘째 자금 순유출"
-    descriptionLabel.text = "국내 주식형 펀드에서 사흘째 자금이 빠져나갔다. 26일 금융투자협회에 따르면 지난 22일 상장지수펀드(ETF)를 제외한 국내 주식형 펀드에서 126억원이 순유출됐다. 472억원이 들어오고 598억원이 펀드..."
+    let date = String(Array(news.publishedAt).prefix(upTo: 10))
+    dateLabel.text = date.replacingOccurrences(of: "-", with: ".")
+    titleLabel.text = news.title
+    descriptionLabel.text = news.description
+
+    guard let imageUrl = URL(string: news.urlToImage ?? "") else { return }
+    imageView.kf.setImage(with: imageUrl)
   }
 }
 
@@ -47,30 +67,43 @@ private extension NewsListCollectionViewCell {
   func setupView() {
     backgroundColor = .systemBackground
 
-    layer.cornerRadius = 20.0
+    layer.cornerRadius = cornerRadius
     layer.shadowColor = UIColor.black.cgColor
     layer.shadowOpacity = 0.1
     layer.shadowRadius = 10.0
     layer.shadowOffset = CGSize(width: 0.0, height: 0.0)
 
-    [dateLabel, titleLabel, descriptionLabel].forEach {
+    [imageView, dateLabel, titleLabel, descriptionLabel].forEach {
       addSubview($0)
     }
 
     let inset: CGFloat = 16.0
+    let spacing: CGFloat = 8.0
+
+    imageView.snp.makeConstraints {
+      $0.width.height.equalTo(100.0)
+      $0.leading.equalToSuperview().inset(inset)
+      $0.centerY.equalToSuperview()
+    }
 
     dateLabel.snp.makeConstraints {
-      $0.top.leading.equalToSuperview().inset(inset)
+      $0.width.equalTo(73.0)
+      $0.height.equalTo(25.0)
+      $0.leading.equalTo(imageView.snp.trailing).offset(spacing)
+      $0.top.equalTo(imageView.snp.top)
     }
 
     titleLabel.snp.makeConstraints {
-      $0.leading.trailing.equalToSuperview().inset(inset)
-      $0.top.equalTo(dateLabel.snp.bottom).offset(8.0)
+      $0.trailing.equalToSuperview().inset(inset)
+      $0.leading.equalTo(imageView.snp.trailing).offset(spacing)
+      $0.top.equalTo(dateLabel.snp.bottom).offset(spacing)
     }
 
     descriptionLabel.snp.makeConstraints {
-      $0.leading.trailing.bottom.equalToSuperview().inset(inset)
-      $0.top.equalTo(titleLabel.snp.bottom).offset(8.0)
+      $0.trailing.equalToSuperview().inset(inset)
+      $0.leading.equalTo(imageView.snp.trailing).offset(spacing)
+      $0.top.equalTo(titleLabel.snp.bottom).offset(spacing)
+      $0.bottom.equalTo(imageView.snp.bottom)
     }
   }
 }

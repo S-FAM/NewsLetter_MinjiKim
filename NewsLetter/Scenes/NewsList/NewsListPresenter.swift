@@ -10,18 +10,28 @@ import UIKit
 protocol NewsListProtocol: AnyObject {
   func setupNavigationBar()
   func setupView()
+
+  func reloadCollectionView()
 }
 
 final class NewsListPresenter: NSObject {
   private weak var viewController: NewsListProtocol?
+  private let newsSearchManager: NewsSearchManagerProtocol
 
-  init(viewController: NewsListProtocol) {
+  private var newsList: [News] = []
+
+  init(
+    viewController: NewsListProtocol,
+    newsSearchManager: NewsSearchManagerProtocol = NewsSearchManager()
+  ) {
     self.viewController = viewController
+    self.newsSearchManager = newsSearchManager
   }
 
   func viewDidLoad() {
     viewController?.setupNavigationBar()
     viewController?.setupView()
+    requestNewsList(isNeededToReset: true)
   }
 }
 
@@ -31,7 +41,7 @@ extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegat
     _ collectionView: UICollectionView,
     numberOfItemsInSection section: Int
   ) -> Int {
-    return 10
+    return newsList.count
   }
 
   func collectionView(
@@ -43,7 +53,8 @@ extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegat
       for: indexPath
     ) as? NewsListCollectionViewCell else { return UICollectionViewCell() }
 
-    cell.update()
+    let news = newsList[indexPath.row]
+    cell.update(news: news)
 
     return cell
   }
@@ -65,5 +76,21 @@ extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegat
   ) -> UIEdgeInsets {
     let inset: CGFloat = 16.0
     return UIEdgeInsets(top: inset, left: 0.0, bottom: inset, right: 0.0)
+  }
+}
+
+// MARK: - Request NewsList
+private extension NewsListPresenter {
+  func requestNewsList(isNeededToReset: Bool) {
+    if isNeededToReset {
+      newsList = []
+    }
+
+    newsSearchManager.getTopHeadlines { [weak self] newValue in
+      guard let self = self else { return }
+
+      self.newsList += newValue
+      self.viewController?.reloadCollectionView()
+    }
   }
 }
