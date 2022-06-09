@@ -25,6 +25,7 @@ final class NewsListViewController: UIViewController {
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: collectionViewLayout)
     collectionView.dataSource = presenter
     collectionView.delegate = presenter
+    collectionView.backgroundColor = .secondarySystemBackground
 
     collectionView.register(
       NewsListCollectionViewCell.self,
@@ -57,5 +58,9 @@ extension NewsListViewController: NewsListProtocol {
     collectionView.snp.makeConstraints {
       $0.edges.equalToSuperview()
     }
+  }
+
+  func reloadCollectionView() {
+    collectionView.reloadData()
   }
 }
