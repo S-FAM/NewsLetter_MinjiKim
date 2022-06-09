@@ -66,7 +66,7 @@ extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegat
   ) -> CGSize {
     let spacing: CGFloat = 16.0
     let width = collectionView.frame.width - spacing * 2
-    return CGSize(width: width, height: 125.0)
+    return CGSize(width: width, height: 132.0)
   }
 
   func collectionView(

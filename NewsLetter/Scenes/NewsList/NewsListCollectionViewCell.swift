@@ -13,6 +13,8 @@ final class NewsListCollectionViewCell: UICollectionViewCell {
   static let identifier = "NewsListCollectionViewCell"
 
   private let cornerRadius: CGFloat = 20.0
+  private let inset: CGFloat = 16.0
+  private let spacing: CGFloat = 8.0
 
   private lazy var dateLabel: UILabel = {
     let label = UILabel()
@@ -29,6 +31,7 @@ final class NewsListCollectionViewCell: UICollectionViewCell {
   private lazy var titleLabel: UILabel = {
     let label = UILabel()
     label.font = .systemFont(ofSize: 14.0, weight: .bold)
+    label.numberOfLines = 0
 
     return label
   }()
@@ -58,7 +61,10 @@ final class NewsListCollectionViewCell: UICollectionViewCell {
     titleLabel.text = news.title
     descriptionLabel.text = news.description
 
-    guard let imageUrl = URL(string: news.urlToImage ?? "") else { return }
+    guard let imageUrl = URL(string: news.urlToImage ?? "") else {
+      updateViewConstraints()
+      return
+    }
     imageView.kf.setImage(with: imageUrl)
   }
 }
@@ -77,33 +83,53 @@ private extension NewsListCollectionViewCell {
       addSubview($0)
     }
 
-    let inset: CGFloat = 16.0
-    let spacing: CGFloat = 8.0
-
     imageView.snp.makeConstraints {
       $0.width.height.equalTo(100.0)
-      $0.leading.equalToSuperview().inset(inset)
+      $0.trailing.equalToSuperview().inset(inset)
       $0.centerY.equalToSuperview()
     }
 
     dateLabel.snp.makeConstraints {
       $0.width.equalTo(73.0)
       $0.height.equalTo(25.0)
-      $0.leading.equalTo(imageView.snp.trailing).offset(spacing)
+      $0.leading.equalToSuperview().inset(inset)
       $0.top.equalTo(imageView.snp.top)
     }
 
     titleLabel.snp.makeConstraints {
-      $0.trailing.equalToSuperview().inset(inset)
-      $0.leading.equalTo(imageView.snp.trailing).offset(spacing)
+      $0.leading.equalTo(dateLabel.snp.leading)
+      $0.trailing.equalToSuperview().inset(100.0 + inset + spacing)
       $0.top.equalTo(dateLabel.snp.bottom).offset(spacing)
     }
 
     descriptionLabel.snp.makeConstraints {
-      $0.trailing.equalToSuperview().inset(inset)
-      $0.leading.equalTo(imageView.snp.trailing).offset(spacing)
+      $0.leading.equalTo(titleLabel.snp.leading)
+      $0.trailing.equalTo(titleLabel.snp.trailing)
       $0.top.equalTo(titleLabel.snp.bottom).offset(spacing)
       $0.bottom.equalTo(imageView.snp.bottom)
+    }
+  }
+
+  func updateViewConstraints() {
+    imageView.isHidden = true
+
+    dateLabel.snp.remakeConstraints {
+      $0.width.equalTo(73.0)
+      $0.height.equalTo(25.0)
+      $0.leading.top.equalToSuperview().inset(inset)
+    }
+
+    titleLabel.snp.remakeConstraints {
+      $0.leading.equalTo(dateLabel.snp.leading)
+      $0.trailing.equalToSuperview().inset(inset)
+      $0.top.equalTo(dateLabel.snp.bottom).offset(spacing)
+    }
+
+    descriptionLabel.snp.remakeConstraints {
+      $0.leading.equalTo(titleLabel.snp.leading)
+      $0.trailing.equalToSuperview().inset(inset)
+      $0.top.equalTo(titleLabel.snp.bottom).offset(spacing)
+      $0.bottom.equalToSuperview().inset(inset)
     }
   }
 }
