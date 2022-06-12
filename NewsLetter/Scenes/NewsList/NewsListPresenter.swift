@@ -20,6 +20,9 @@ final class NewsListPresenter: NSObject {
 
   private var newsList: [News] = []
 
+  private var currentPage: Int = 0
+  private let pageSize: Int = 10
+
   init(
     viewController: NewsListProtocol,
     newsSearchManager: NewsSearchManagerProtocol = NewsSearchManager()
@@ -77,6 +80,18 @@ extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegat
     let inset: CGFloat = 16.0
     return UIEdgeInsets(top: inset, left: 0.0, bottom: inset, right: 0.0)
   }
+
+  func collectionView(
+    _ collectionView: UICollectionView,
+    willDisplay cell: UICollectionViewCell,
+    forItemAt indexPath: IndexPath
+  ) {
+    let currentRow = indexPath.row
+    guard (currentRow % pageSize) == (pageSize - 3) &&
+            (currentRow / pageSize) == (currentPage - 1) else { return }
+
+    requestNewsList(isNeededToReset: false)
+  }
 }
 
 // MARK: - Request NewsList
@@ -84,12 +99,17 @@ private extension NewsListPresenter {
   func requestNewsList(isNeededToReset: Bool) {
     if isNeededToReset {
       newsList = []
+      currentPage = 0
     }
 
-    newsSearchManager.getTopHeadlines { [weak self] newValue in
+    newsSearchManager.getTopHeadlines(
+      pageSize: pageSize,
+      page: currentPage + 1
+    ) { [weak self] newValue in
       guard let self = self else { return }
 
       self.newsList += newValue
+      self.currentPage += 1
       self.viewController?.reloadCollectionView()
     }
   }
