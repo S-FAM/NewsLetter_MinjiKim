@@ -12,6 +12,7 @@ protocol NewsListProtocol: AnyObject {
   func setupView()
 
   func reloadCollectionView()
+  func openSFSafariView(_ url: String)
 }
 
 final class NewsListPresenter: NSObject {
@@ -92,6 +93,14 @@ extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegat
             (currentRow / display) == (currentPage - 1) else { return }
 
     requestNewsList(isNeededToReset: false)
+  }
+
+  func collectionView(
+    _ collectionView: UICollectionView,
+    didSelectItemAt indexPath: IndexPath
+  ) {
+    let url = newsList[indexPath.row].link
+    viewController?.openSFSafariView(url)
   }
 }
 
