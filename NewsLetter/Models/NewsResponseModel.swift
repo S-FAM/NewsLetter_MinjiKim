@@ -6,18 +6,12 @@
 //
 
 struct NewsResponseModel: Decodable {
-  var articles: [News]
+  var items: [News] = []
 }
 
 struct News: Decodable {
-  let source: Source
   let title: String
-  let description: String?
-  let url: String?
-  let urlToImage: String?
-  let publishedAt: String
-}
-
-struct Source: Decodable {
-  let name: String
+  let link: String
+  let description: String
+  let pubDate: String
 }

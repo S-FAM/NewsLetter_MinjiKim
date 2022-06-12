@@ -5,7 +5,6 @@
 //  Created by 김민지 on 2022/06/06.
 //
 
-import SnapKit
 import UIKit
 
 final class NewsListViewController: UIViewController {

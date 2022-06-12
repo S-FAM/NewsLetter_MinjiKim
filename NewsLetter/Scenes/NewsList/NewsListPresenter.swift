@@ -20,6 +20,10 @@ final class NewsListPresenter: NSObject {
 
   private var newsList: [News] = []
 
+  private var currentKeyword = "아이폰"
+  private var currentPage: Int = 0
+  private let display: Int = 20
+
   init(
     viewController: NewsListProtocol,
     newsSearchManager: NewsSearchManagerProtocol = NewsSearchManager()
@@ -66,7 +70,7 @@ extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegat
   ) -> CGSize {
     let spacing: CGFloat = 16.0
     let width = collectionView.frame.width - spacing * 2
-    return CGSize(width: width, height: 125.0)
+    return CGSize(width: width, height: 132.0)
   }
 
   func collectionView(
@@ -77,6 +81,18 @@ extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegat
     let inset: CGFloat = 16.0
     return UIEdgeInsets(top: inset, left: 0.0, bottom: inset, right: 0.0)
   }
+
+  func collectionView(
+    _ collectionView: UICollectionView,
+    willDisplay cell: UICollectionViewCell,
+    forItemAt indexPath: IndexPath
+  ) {
+    let currentRow = indexPath.row
+    guard (currentRow % display) == (display - 3) &&
+            (currentRow / display) == (currentPage - 1) else { return }
+
+    requestNewsList(isNeededToReset: false)
+  }
 }
 
 // MARK: - Request NewsList
@@ -84,12 +100,18 @@ private extension NewsListPresenter {
   func requestNewsList(isNeededToReset: Bool) {
     if isNeededToReset {
       newsList = []
+      currentPage = 0
     }
 
-    newsSearchManager.getTopHeadlines { [weak self] newValue in
+    newsSearchManager.request(
+      from: currentKeyword,
+      start: (currentPage * display) + 1,
+      display: display
+    ) { [weak self] newValue in
       guard let self = self else { return }
 
       self.newsList += newValue
+      self.currentPage += 1
       self.viewController?.reloadCollectionView()
     }
   }
