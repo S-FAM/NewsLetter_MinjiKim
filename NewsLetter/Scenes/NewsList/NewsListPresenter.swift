@@ -20,8 +20,9 @@ final class NewsListPresenter: NSObject {
 
   private var newsList: [News] = []
 
+  private var currentKeyword = "아이폰"
   private var currentPage: Int = 0
-  private let pageSize: Int = 10
+  private let display: Int = 20
 
   init(
     viewController: NewsListProtocol,
@@ -87,8 +88,8 @@ extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegat
     forItemAt indexPath: IndexPath
   ) {
     let currentRow = indexPath.row
-    guard (currentRow % pageSize) == (pageSize - 3) &&
-            (currentRow / pageSize) == (currentPage - 1) else { return }
+    guard (currentRow % display) == (display - 3) &&
+            (currentRow / display) == (currentPage - 1) else { return }
 
     requestNewsList(isNeededToReset: false)
   }
@@ -102,9 +103,10 @@ private extension NewsListPresenter {
       currentPage = 0
     }
 
-    newsSearchManager.getTopHeadlines(
-      pageSize: pageSize,
-      page: currentPage + 1
+    newsSearchManager.request(
+      from: currentKeyword,
+      start: (currentPage * display) + 1,
+      display: display
     ) { [weak self] newValue in
       guard let self = self else { return }
 

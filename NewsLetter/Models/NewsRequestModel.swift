@@ -8,8 +8,7 @@
 import Foundation
 
 struct NewsRequestModel: Codable {
-  let apiKey: String
-  let country: String
-  let pageSize: Int
-  let page: Int
+  let start: Int
+  let display: Int
+  let query: String
 }
