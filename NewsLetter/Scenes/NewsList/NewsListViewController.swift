@@ -5,6 +5,7 @@
 //  Created by 김민지 on 2022/06/06.
 //
 
+import SafariServices
 import UIKit
 
 final class NewsListViewController: UIViewController {
@@ -61,5 +62,12 @@ extension NewsListViewController: NewsListProtocol {
 
   func reloadCollectionView() {
     collectionView.reloadData()
+  }
+
+  func openSFSafariView(_ url: String) {
+    guard let url = URL(string: url) else { return }
+
+    let safariView = SFSafariViewController(url: url)
+    present(safariView, animated: true, completion: nil)
   }
 }
