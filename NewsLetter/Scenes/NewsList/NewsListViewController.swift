@@ -14,6 +14,7 @@ final class NewsListViewController: UIViewController {
   private lazy var searchController: UISearchController = {
     let searchController = UISearchController(searchResultsController: nil)
     searchController.obscuresBackgroundDuringPresentation = false
+    searchController.searchBar.delegate = presenter
 
     return searchController
   }()
