@@ -13,6 +13,7 @@ protocol NewsListProtocol: AnyObject {
 
   func reloadCollectionView()
   func openSFSafariView(_ url: String)
+  func endRefreshing()
 }
 
 final class NewsListPresenter: NSObject {
@@ -36,6 +37,10 @@ final class NewsListPresenter: NSObject {
   func viewDidLoad() {
     viewController?.setupNavigationBar()
     viewController?.setupView()
+    requestNewsList(isNeededToReset: true)
+  }
+
+  func didCalledRefresh() {
     requestNewsList(isNeededToReset: true)
   }
 }
@@ -132,6 +137,7 @@ private extension NewsListPresenter {
       self.newsList += newValue
       self.currentPage += 1
       self.viewController?.reloadCollectionView()
+      self.viewController?.endRefreshing()
     }
   }
 }

@@ -11,6 +11,13 @@ import UIKit
 final class NewsListViewController: UIViewController {
   private lazy var presenter = NewsListPresenter(viewController: self)
 
+  private lazy var refreshControl: UIRefreshControl = {
+    let refreshControl = UIRefreshControl()
+    refreshControl.addTarget(self, action: #selector(didCallRefresh), for: .valueChanged)
+
+    return refreshControl
+  }()
+
   private lazy var searchController: UISearchController = {
     let searchController = UISearchController(searchResultsController: nil)
     searchController.obscuresBackgroundDuringPresentation = false
@@ -32,6 +39,8 @@ final class NewsListViewController: UIViewController {
       NewsListCollectionViewCell.self,
       forCellWithReuseIdentifier: NewsListCollectionViewCell.identifier
     )
+
+    collectionView.refreshControl = refreshControl
 
     return collectionView
   }()
@@ -65,10 +74,21 @@ extension NewsListViewController: NewsListProtocol {
     collectionView.reloadData()
   }
 
+  func endRefreshing() {
+    refreshControl.endRefreshing()
+  }
+
   func openSFSafariView(_ url: String) {
     guard let url = URL(string: url) else { return }
 
     let safariView = SFSafariViewController(url: url)
     present(safariView, animated: true, completion: nil)
+  }
+}
+
+// MARK: - @objc Function
+private extension NewsListViewController {
+  @objc func didCallRefresh() {
+    presenter.didCalledRefresh()
   }
 }
