@@ -40,6 +40,16 @@ final class NewsListPresenter: NSObject {
   }
 }
 
+// MARK: - UISearchBar
+extension NewsListPresenter: UISearchBarDelegate {
+  func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+    guard let searchText = searchBar.text else { return }
+
+    currentKeyword = searchText
+    requestNewsList(isNeededToReset: true)
+  }
+}
+
 // MARK: - UICollectionView
 extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
   func collectionView(
