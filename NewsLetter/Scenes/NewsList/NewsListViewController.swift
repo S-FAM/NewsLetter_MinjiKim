@@ -37,7 +37,8 @@ final class NewsListViewController: UIViewController {
       NewsListTableViewCell.self,
       forCellReuseIdentifier: NewsListTableViewCell.identifier
     )
-
+    
+    tableView.refreshControl = refreshControl
     return tableView
   }()
 
