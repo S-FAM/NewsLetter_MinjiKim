@@ -11,8 +11,9 @@ protocol NewsListProtocol: AnyObject {
   func setupNavigationBar()
   func setupView()
 
-  func reloadCollectionView()
+  func reloadTableView()
   func openSFSafariView(_ url: String)
+  func endRefreshing()
 }
 
 final class NewsListPresenter: NSObject {
@@ -38,6 +39,10 @@ final class NewsListPresenter: NSObject {
     viewController?.setupView()
     requestNewsList(isNeededToReset: true)
   }
+
+  func didCalledRefresh() {
+    requestNewsList(isNeededToReset: true)
+  }
 }
 
 // MARK: - UISearchBar
@@ -50,23 +55,23 @@ extension NewsListPresenter: UISearchBarDelegate {
   }
 }
 
-// MARK: - UICollectionView
-extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-  func collectionView(
-    _ collectionView: UICollectionView,
-    numberOfItemsInSection section: Int
+// MARK: - UITableView
+extension NewsListPresenter: UITableViewDataSource, UITableViewDelegate {
+  func tableView(
+    _ tableView: UITableView,
+    numberOfRowsInSection section: Int
   ) -> Int {
-    return newsList.count
+    newsList.count
   }
 
-  func collectionView(
-    _ collectionView: UICollectionView,
-    cellForItemAt indexPath: IndexPath
-  ) -> UICollectionViewCell {
-    guard let cell = collectionView.dequeueReusableCell(
-      withReuseIdentifier: NewsListCollectionViewCell.identifier,
+  func tableView(
+    _ tableView: UITableView,
+    cellForRowAt indexPath: IndexPath
+  ) -> UITableViewCell {
+    guard let cell =  tableView.dequeueReusableCell(
+      withIdentifier: NewsListTableViewCell.identifier,
       for: indexPath
-    ) as? NewsListCollectionViewCell else { return UICollectionViewCell() }
+    ) as? NewsListTableViewCell else { return UITableViewCell() }
 
     let news = newsList[indexPath.row]
     cell.update(news: news)
@@ -74,29 +79,14 @@ extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegat
     return cell
   }
 
-  func collectionView(
-    _ collectionView: UICollectionView,
-    layout collectionViewLayout: UICollectionViewLayout,
-    sizeForItemAt indexPath: IndexPath
-  ) -> CGSize {
-    let spacing: CGFloat = 16.0
-    let width = collectionView.frame.width - spacing * 2
-    return CGSize(width: width, height: 132.0)
+  func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    148.0
   }
 
-  func collectionView(
-    _ collectionView: UICollectionView,
-    layout collectionViewLayout: UICollectionViewLayout,
-    insetForSectionAt section: Int
-  ) -> UIEdgeInsets {
-    let inset: CGFloat = 16.0
-    return UIEdgeInsets(top: inset, left: 0.0, bottom: inset, right: 0.0)
-  }
-
-  func collectionView(
-    _ collectionView: UICollectionView,
-    willDisplay cell: UICollectionViewCell,
-    forItemAt indexPath: IndexPath
+  func tableView(
+    _ tableView: UITableView,
+    willDisplay cell: UITableViewCell,
+    forRowAt indexPath: IndexPath
   ) {
     let currentRow = indexPath.row
     guard (currentRow % display) == (display - 3) &&
@@ -105,9 +95,9 @@ extension NewsListPresenter: UICollectionViewDataSource, UICollectionViewDelegat
     requestNewsList(isNeededToReset: false)
   }
 
-  func collectionView(
-    _ collectionView: UICollectionView,
-    didSelectItemAt indexPath: IndexPath
+  func tableView(
+    _ tableView: UITableView,
+    didSelectRowAt indexPath: IndexPath
   ) {
     let url = newsList[indexPath.row].link
     viewController?.openSFSafariView(url)
@@ -131,7 +121,8 @@ private extension NewsListPresenter {
 
       self.newsList += newValue
       self.currentPage += 1
-      self.viewController?.reloadCollectionView()
+      self.viewController?.reloadTableView()
+      self.viewController?.endRefreshing()
     }
   }
 }

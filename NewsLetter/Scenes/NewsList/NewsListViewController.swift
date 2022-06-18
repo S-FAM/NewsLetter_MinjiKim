@@ -11,6 +11,13 @@ import UIKit
 final class NewsListViewController: UIViewController {
   private lazy var presenter = NewsListPresenter(viewController: self)
 
+  private lazy var refreshControl: UIRefreshControl = {
+    let refreshControl = UIRefreshControl()
+    refreshControl.addTarget(self, action: #selector(didCallRefresh), for: .valueChanged)
+
+    return refreshControl
+  }()
+
   private lazy var searchController: UISearchController = {
     let searchController = UISearchController(searchResultsController: nil)
     searchController.obscuresBackgroundDuringPresentation = false
@@ -19,21 +26,20 @@ final class NewsListViewController: UIViewController {
     return searchController
   }()
 
-  private lazy var collectionView: UICollectionView = {
-    let collectionViewLayout = UICollectionViewFlowLayout()
-    collectionViewLayout.minimumLineSpacing = 16.0
+  private lazy var tableView: UITableView = {
+    let tableView = UITableView()
+    tableView.dataSource = presenter
+    tableView.delegate = presenter
+    tableView.backgroundColor = .secondarySystemBackground
+    tableView.separatorStyle = .none
 
-    let collectionView = UICollectionView(frame: .zero, collectionViewLayout: collectionViewLayout)
-    collectionView.dataSource = presenter
-    collectionView.delegate = presenter
-    collectionView.backgroundColor = .secondarySystemBackground
-
-    collectionView.register(
-      NewsListCollectionViewCell.self,
-      forCellWithReuseIdentifier: NewsListCollectionViewCell.identifier
+    tableView.register(
+      NewsListTableViewCell.self,
+      forCellReuseIdentifier: NewsListTableViewCell.identifier
     )
-
-    return collectionView
+    
+    tableView.refreshControl = refreshControl
+    return tableView
   }()
 
   override func viewDidLoad() {
@@ -54,15 +60,19 @@ extension NewsListViewController: NewsListProtocol {
   }
 
   func setupView() {
-    view.addSubview(collectionView)
+    view.addSubview(tableView)
 
-    collectionView.snp.makeConstraints {
+    tableView.snp.makeConstraints {
       $0.edges.equalToSuperview()
     }
   }
 
-  func reloadCollectionView() {
-    collectionView.reloadData()
+  func reloadTableView() {
+    tableView.reloadData()
+  }
+
+  func endRefreshing() {
+    refreshControl.endRefreshing()
   }
 
   func openSFSafariView(_ url: String) {
@@ -70,5 +80,12 @@ extension NewsListViewController: NewsListProtocol {
 
     let safariView = SFSafariViewController(url: url)
     present(safariView, animated: true, completion: nil)
+  }
+}
+
+// MARK: - @objc Function
+private extension NewsListViewController {
+  @objc func didCallRefresh() {
+    presenter.didCalledRefresh()
   }
 }

@@ -1,5 +1,5 @@
 //
-//  NewsListCollectionViewCell.swift
+//  NewsListTableViewCell.swift
 //  NewsLetter
 //
 //  Created by 김민지 on 2022/06/07.
@@ -7,12 +7,20 @@
 
 import UIKit
 
-final class NewsListCollectionViewCell: UICollectionViewCell {
-  static let identifier = "NewsListCollectionViewCell"
+final class NewsListTableViewCell: UITableViewCell {
+  static let identifier = "NewsListTableViewCell"
 
   private let cornerRadius: CGFloat = 20.0
   private let inset: CGFloat = 16.0
   private let spacing: CGFloat = 8.0
+
+  private lazy var roundRectangleView: UIView = {
+    let view = UIView()
+    view.backgroundColor = .systemBackground
+    view.layer.cornerRadius = cornerRadius
+
+    return view
+  }()
 
   private lazy var dateLabel: UILabel = {
     let label = UILabel()
@@ -51,18 +59,20 @@ final class NewsListCollectionViewCell: UICollectionViewCell {
   }
 }
 
-private extension NewsListCollectionViewCell {
+private extension NewsListTableViewCell {
   func setupView() {
-    backgroundColor = .systemBackground
+    selectionStyle = .none
+    backgroundColor = .clear
 
-    layer.cornerRadius = cornerRadius
-    layer.shadowColor = UIColor.black.cgColor
-    layer.shadowOpacity = 0.1
-    layer.shadowRadius = 10.0
-    layer.shadowOffset = CGSize(width: 0.0, height: 0.0)
+    addSubview(roundRectangleView)
 
     [dateLabel, titleLabel, descriptionLabel].forEach {
-      addSubview($0)
+      roundRectangleView.addSubview($0)
+    }
+
+    roundRectangleView.snp.makeConstraints {
+      $0.leading.trailing.equalToSuperview().inset(inset)
+      $0.top.bottom.equalToSuperview().inset(spacing)
     }
 
     dateLabel.snp.makeConstraints {
