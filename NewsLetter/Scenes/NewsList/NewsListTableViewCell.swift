@@ -5,6 +5,7 @@
 //  Created by 김민지 on 2022/06/07.
 //
 
+import SkeletonView
 import UIKit
 
 final class NewsListTableViewCell: UITableViewCell {
@@ -38,6 +39,8 @@ final class NewsListTableViewCell: UITableViewCell {
     let label = UILabel()
     label.font = .systemFont(ofSize: 14.0, weight: .bold)
     label.numberOfLines = 0
+    label.lastLineFillPercent = 50
+    label.linesCornerRadius = 5
 
     return label
   }()
@@ -49,6 +52,15 @@ final class NewsListTableViewCell: UITableViewCell {
 
     return label
   }()
+
+  override func awakeFromNib() {
+    super.awakeFromNib()
+    isSkeletonable = true
+    contentView.isSkeletonable = true
+    dateLabel.isSkeletonable = true
+    titleLabel.isSkeletonable = true
+    descriptionLabel.isSkeletonable = true
+  }
 
   func update(news: News) {
     setupView()
@@ -64,7 +76,7 @@ private extension NewsListTableViewCell {
     selectionStyle = .none
     backgroundColor = .clear
 
-    addSubview(roundRectangleView)
+    contentView.addSubview(roundRectangleView)
 
     [dateLabel, titleLabel, descriptionLabel].forEach {
       roundRectangleView.addSubview($0)

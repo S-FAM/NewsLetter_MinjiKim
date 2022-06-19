@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SkeletonView
 
 protocol NewsListProtocol: AnyObject {
   func setupNavigationBar()
@@ -37,7 +38,6 @@ final class NewsListPresenter: NSObject {
   func viewDidLoad() {
     viewController?.setupNavigationBar()
     viewController?.setupView()
-    requestNewsList(isNeededToReset: true)
   }
 
   func didCalledRefresh() {
@@ -56,7 +56,20 @@ extension NewsListPresenter: UISearchBarDelegate {
 }
 
 // MARK: - UITableView
-extension NewsListPresenter: UITableViewDataSource, UITableViewDelegate {
+extension NewsListPresenter: SkeletonTableViewDataSource, UITableViewDelegate {
+  // skeletonView
+  func collectionSkeletonView(
+    _ skeletonView: UITableView,
+    cellIdentifierForRowAt indexPath: IndexPath
+  ) -> ReusableCellIdentifier {
+    NewsListTableViewCell.identifier
+  }
+
+  func collectionSkeletonView(_ skeletonView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    display
+  }
+
+  // tableView
   func tableView(
     _ tableView: UITableView,
     numberOfRowsInSection section: Int
@@ -105,7 +118,7 @@ extension NewsListPresenter: UITableViewDataSource, UITableViewDelegate {
 }
 
 // MARK: - Request NewsList
-private extension NewsListPresenter {
+extension NewsListPresenter {
   func requestNewsList(isNeededToReset: Bool) {
     if isNeededToReset {
       newsList = []
