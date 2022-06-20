@@ -5,6 +5,7 @@
 //  Created by 김민지 on 2022/06/06.
 //
 
+import SkeletonView
 import SnapKit
 import UIKit
 

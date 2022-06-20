@@ -37,7 +37,11 @@ final class NewsListViewController: UIViewController {
       NewsListTableViewCell.self,
       forCellReuseIdentifier: NewsListTableViewCell.identifier
     )
-    
+    tableView.register(
+      NewsListTableViewHeader.self,
+      forHeaderFooterViewReuseIdentifier: NewsListTableViewHeader.identifier
+    )
+
     tableView.refreshControl = refreshControl
     return tableView
   }()
@@ -45,6 +49,15 @@ final class NewsListViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     presenter.viewDidLoad()
+
+    tableView.isSkeletonable = true
+    tableView.showAnimatedSkeleton(usingColor: .concrete, transition: .crossDissolve(0.25))
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+      self.presenter.requestNewsList(isNeededToReset: true)
+      self.tableView.stopSkeletonAnimation()
+      self.view.hideSkeleton(reloadDataAfter: true, transition: .crossDissolve(0.25))
+    }
   }
 }
 

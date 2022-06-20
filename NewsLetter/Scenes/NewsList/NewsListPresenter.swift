@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SkeletonView
 
 protocol NewsListProtocol: AnyObject {
   func setupNavigationBar()
@@ -22,9 +23,16 @@ final class NewsListPresenter: NSObject {
 
   private var newsList: [News] = []
 
-  private var currentKeyword = "아이폰"
+  private var currentKeyword = "정치"
   private var currentPage: Int = 0
   private let display: Int = 20
+
+  private let tags: [String] = [
+    "정치", "경제", "금융", "증권", "부동산", "사회", "교육", "노동", "언론", "환경",
+    "인권", "복지", "식품", "의료", "지역", "생활", "건강", "자동차", "도로", "교통",
+    "문화", "여행", "음식", "패션", "뷰티", "공연", "전시", "책", "종교", "날씨",
+    "IT", "모바일", "인터넷", "통신", "게임", "과학", "세계"
+  ]
 
   init(
     viewController: NewsListProtocol,
@@ -37,10 +45,16 @@ final class NewsListPresenter: NSObject {
   func viewDidLoad() {
     viewController?.setupNavigationBar()
     viewController?.setupView()
-    requestNewsList(isNeededToReset: true)
   }
 
   func didCalledRefresh() {
+    requestNewsList(isNeededToReset: true)
+  }
+}
+
+extension NewsListPresenter: NewsListTableViewHeaderDelegate {
+  func didSelectTag(_ selectedIndex: Int) {
+    currentKeyword = tags[selectedIndex]
     requestNewsList(isNeededToReset: true)
   }
 }
@@ -56,7 +70,20 @@ extension NewsListPresenter: UISearchBarDelegate {
 }
 
 // MARK: - UITableView
-extension NewsListPresenter: UITableViewDataSource, UITableViewDelegate {
+extension NewsListPresenter: SkeletonTableViewDataSource, UITableViewDelegate {
+  // skeletonView
+  func collectionSkeletonView(
+    _ skeletonView: UITableView,
+    cellIdentifierForRowAt indexPath: IndexPath
+  ) -> ReusableCellIdentifier {
+    NewsListTableViewCell.identifier
+  }
+
+  func collectionSkeletonView(_ skeletonView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    display
+  }
+
+  // tableView
   func tableView(
     _ tableView: UITableView,
     numberOfRowsInSection section: Int
@@ -79,8 +106,31 @@ extension NewsListPresenter: UITableViewDataSource, UITableViewDelegate {
     return cell
   }
 
-  func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+  func tableView(
+    _ tableView: UITableView,
+    viewForHeaderInSection section: Int
+  ) -> UIView? {
+    guard let header = tableView.dequeueReusableHeaderFooterView(
+      withIdentifier: NewsListTableViewHeader.identifier
+    ) as? NewsListTableViewHeader else { return UIView() }
+
+    header.setupView(tags: tags, delegate: self)
+
+    return header
+  }
+
+  func tableView(
+    _ tableView: UITableView,
+    heightForRowAt indexPath: IndexPath
+  ) -> CGFloat {
     148.0
+  }
+
+  func tableView(
+    _ tableView: UITableView,
+    heightForHeaderInSection section: Int
+  ) -> CGFloat {
+    50.0
   }
 
   func tableView(
@@ -105,7 +155,7 @@ extension NewsListPresenter: UITableViewDataSource, UITableViewDelegate {
 }
 
 // MARK: - Request NewsList
-private extension NewsListPresenter {
+extension NewsListPresenter {
   func requestNewsList(isNeededToReset: Bool) {
     if isNeededToReset {
       newsList = []
