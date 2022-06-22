@@ -7,35 +7,39 @@
 
 import XCTest
 
-class NewsLetterUITests: XCTestCase {
+final class NewsLetterUITests: XCTestCase {
+  var app: XCUIApplication!
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+  override func setUp() {
+    super.setUp()
 
-        // In UI tests it is usually best to stop immediately when a failure occurs.
-        continueAfterFailure = false
+    continueAfterFailure = false  // 하나라도 실패하면 종료
 
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
+    app = XCUIApplication() // 테스트를 위한 UIApplication
+    app.launch()            // 테스트 앱 실행
+  }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
+  override func tearDown() {
+    super.tearDown()
 
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
-        app.launch()
+    app = nil
+  }
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
+  func test_navigationBar의_title이_News로_되어있다() {
+    let existsNavigationBar = app.navigationBars["News"].exists
+    XCTAssertTrue(existsNavigationBar)
+  }
 
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-            }
-        }
-    }
+  func test_searchBar가_존재한다() {
+    let existsSearchBar = app.navigationBars["News"].searchFields["Search"].exists
+    XCTAssertTrue(existsSearchBar)
+  }
+
+  func test_searchBar에_cancel버튼이_존재한다() {
+    let navigationBar = app.navigationBars["News"]
+    navigationBar.searchFields["Search"].tap()
+
+    let existsSearchBarCancelButton = navigationBar.buttons["Cancel"].exists
+    XCTAssertTrue(existsSearchBarCancelButton)
+  }
 }
